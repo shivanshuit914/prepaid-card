@@ -15,5 +15,12 @@ return [
             'path' => __DIR__ . '/../logs/app.log',
             'level' => \Monolog\Logger::DEBUG,
         ],
+        //Mysql Docker container
+        "db" => [
+            "host" => "fp_fp_db_1",
+            "dbname" => "fp",
+            "user" => "fp",
+            "pass" => "root"
+        ],
     ],
 ];

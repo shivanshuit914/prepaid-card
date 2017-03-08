@@ -2,14 +2,26 @@
 
 namespace spec\Domain\Statement;
 
+use Domain\Card\BalanceRepositoryInterface;
 use Domain\Statement\StatementGenerator;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class StatementGeneratorSpec extends ObjectBehavior
 {
-    function it_is_initializable()
+    function let(BalanceRepositoryInterface $balanceRepository)
     {
-        $this->shouldHaveType(StatementGenerator::class);
+        $this->beConstructedWith($balanceRepository);
+    }
+
+    function it_generates_transactions_statement_for_card()
+    {
+        $cardDetails = [
+            'number' => 1234323423424232,
+            'issue' => '05-16',
+            'expiry' => '05-19',
+            'security' => '123'
+        ];
+        $this->generate($cardDetails);
     }
 }
