@@ -11,9 +11,10 @@ use Domain\Transaction\TransactionAuthorizer;
 use Domain\Transaction\TransactionCapturer;
 use Domain\Transaction\TransactionRefunder;
 use Exception;
+use Interop\Container\ContainerInterface;
+use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\App;
 
 class CardController
 {
@@ -26,23 +27,35 @@ class CardController
      * @var ResponseInterface
      */
     private $response;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
+     * @var PDO
+     */
+    private $connection;
 
     /**
      * CardController constructor.
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
+     * @param ContainerInterface $container
      */
-    public function __construct(ServerRequestInterface $request, ResponseInterface $response)
+    public function __construct(ServerRequestInterface $request, ResponseInterface $response, ContainerInterface $container)
     {
         $this->request = $request;
         $this->response = $response;
+        $this->container = $container;
+        $this->connection = $this->container->get('pdo');
     }
 
     public function createNew()
     {
         try {
             $requestBody = $this->request->getParsedBody();
-            $cardCreater = new CardCreater(new CardMysqlRepository());
+            $cardCreater = new CardCreater(new CardMysqlRepository($this->connection));
             $cardCreater->createCard($requestBody['user_details']);
 
             return $this->response->withJson([
@@ -61,7 +74,7 @@ class CardController
     {
         try {
             $requestBody = $this->request->getParsedBody();
-            $moneyLoader = new CardMoneyLoader(new BalanceMysqlRepository());
+            $moneyLoader = new CardMoneyLoader(new BalanceMysqlRepository($this->connection));
             $moneyLoader->loadMoney($requestBody['card_details'], $requestBody['amount']);
 
             return $this->response->withJson([
@@ -80,9 +93,7 @@ class CardController
     {
         try {
             $requestBody = $this->request->getParsedBody();
-            $moneyLoader = new CardMoneyLoader(new BalanceMysqlRepository());
-            $moneyLoader->loadMoney($requestBody['card_details'], $requestBody['amount']);
-            $transactionAuthorizer = new TransactionAuthorizer(new BalanceMysqlRepository());
+            $transactionAuthorizer = new TransactionAuthorizer(new BalanceMysqlRepository($this->connection));
             $transactionAuthorizer->authorize(
                 $requestBody['card_details'],
                 $requestBody['merchant_details'],
@@ -105,7 +116,7 @@ class CardController
     {
         try {
             $requestBody = $this->request->getParsedBody();
-            $transactionCapturer = new TransactionCapturer(new BalanceMysqlRepository());
+            $transactionCapturer = new TransactionCapturer(new BalanceMysqlRepository($this->connection));
             $transactionCapturer->capture(
                 $requestBody['merchant_details'],
                 $requestBody['card_details'],
@@ -129,7 +140,7 @@ class CardController
     {
         try {
             $requestBody = $this->request->getParsedBody();
-            $transactionRefunder = new TransactionRefunder(new BalanceMysqlRepository());
+            $transactionRefunder = new TransactionRefunder(new BalanceMysqlRepository($this->connection));
             $transactionRefunder->refund(
                 $requestBody['merchant_details'],
                 $requestBody['card_details'],
@@ -148,18 +159,13 @@ class CardController
         }
     }
 
-    public function getStatement()
+    public function getStatement($request, $response, $number)
     {
         try {
-            $app = new App();
-            $continer = $app->getContainer();
-            $balanceRepository = $continer->get('db');
-            var_dump($balanceRepository);exit;
-            $requestBody = $this->request->getParsedBody();
-            $statementGenerator = new StatementGenerator($balanceRepository);
-            $statement = $statementGenerator->generate(
-                $requestBody['merchant_details']
+            $statementGenerator = new StatementGenerator(
+                new BalanceMysqlRepository($this->connection)
             );
+            $statement = $statementGenerator->generate($number);
 
             return $this->response->withJson([
                 'success' => true,

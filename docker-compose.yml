@@ -1,0 +1,9 @@
+card_db:
+    image: percona:5.6.33
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: card
+        MYSQL_USER: card
+        MYSQL_PASSWORD: card
+    expose:
+        - 3306

@@ -5,6 +5,7 @@ namespace spec\Domain\Transaction;
 use Domain\Card\BalanceRepositoryInterface;
 use Domain\Card\PrepaidCard;
 use Domain\Transaction\TransactionAuthorizer;
+use Domain\User\Merchant;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -40,9 +41,12 @@ class TransactionAuthorizerSpec extends ObjectBehavior
             'security' => '123'
         ];
 
-        $balanceRepository->getTotalBalance(PrepaidCard::withDetails($cardDetails))->willReturn(10000);
-
+        $card = PrepaidCard::withDetails($cardDetails);
+        $balanceRepository->getTotalBalance($card)->willReturn(10000);
         $merchantDetails = ['name' => 'Coffee shop', 'account_details' => ['sortcode' => 123456, 'account_number' => 1233454]];
-//        $this->authorize($cardDetails, $merchantDetails, 1000);
+        $merchant = Merchant::withNameAndAccountDetails($merchantDetails['name'], $merchantDetails['account_details']);
+        $balanceRepository->blockBalance($card, $merchant, 1000)->shouldBeCalled();
+
+        $this->authorize($cardDetails, $merchantDetails, 1000);
     }
 }

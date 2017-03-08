@@ -17,10 +17,10 @@ return [
         ],
         //Mysql Docker container
         "db" => [
-            "host" => "fp_fp_db_1",
-            "dbname" => "fp",
-            "user" => "fp",
-            "pass" => "root"
+            "host" => "card_card_db_1.percona.docker",
+            "dbname" => "card",
+            "user" => "card",
+            "pass" => "card"
         ],
     ],
 ];

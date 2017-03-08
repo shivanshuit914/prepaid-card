@@ -20,6 +20,14 @@ class CardMysqlRepository implements CardRepositoryInterface
 
     public function save(PrepaidCard $card)
     {
-
+        $sql = "INSERT INTO prepaid_card (card_number, issue, expiry, security) 
+                VALUES (:card_number, :issue, :expiry, :security)";
+        $sth = $this->connection->prepare($sql);
+        $cardDetails = $card->getCardDetails();
+        $sth->bindParam("card_number", $cardDetails['number']);
+        $sth->bindParam("issue", $cardDetails['issue']);
+        $sth->bindParam("expiry", $cardDetails['expiry']);
+        $sth->bindParam("security", $cardDetails['security']);
+        $sth->execute();
     }
 }

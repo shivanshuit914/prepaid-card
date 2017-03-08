@@ -25,9 +25,12 @@ class TransactionRefunderSpec extends ObjectBehavior
             'security' => '123'
         ];
         $merchantDetails = ['name' => 'Coffee shop', 'account_details' => ['sortcode' => 123456, 'account_number' => 1233454]];
+        $merchant = Merchant::withNameAndAccountDetails($merchantDetails['name'], $merchantDetails['account_details']);
+        $card = PrepaidCard::withDetails($cardDetails);
         $balanceRepository->getCapturedBalanceByMerchant(
-            Merchant::withNameAndAccountDetails($merchantDetails['name'], $merchantDetails['account_details']), PrepaidCard::withDetails($cardDetails))
+            $merchant, $card)
             ->willReturn(100);
+        $balanceRepository->refundBalance($merchant, $card, 100)->shouldBeCalled();
         $this->refund($merchantDetails, $cardDetails, 100);
     }
 

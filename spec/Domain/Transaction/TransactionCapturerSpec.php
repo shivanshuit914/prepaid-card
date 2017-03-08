@@ -3,7 +3,9 @@
 namespace spec\Domain\Transaction;
 
 use Domain\Card\BalanceRepositoryInterface;
+use Domain\Card\PrepaidCard;
 use Domain\Transaction\TransactionCapturer;
+use Domain\User\Merchant;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -27,7 +29,7 @@ class TransactionCapturerSpec extends ObjectBehavior
         $this->shouldThrow(\Exception::class)->duringCapture($merchantDetails, $cardDetails, 10000);
     }
 
-    function it_captures_blocked_transaction_amount()
+    function it_captures_blocked_transaction_amount(BalanceRepositoryInterface $balanceRepository)
     {
         $cardDetails = [
             'number' => 1234323423424232,
@@ -36,6 +38,9 @@ class TransactionCapturerSpec extends ObjectBehavior
             'security' => '123'
         ];
         $merchantDetails = ['name' => 'Coffee shop', 'account_details' => ['sortcode' => 123456, 'account_number' => 1233454]];
+        $merchant = Merchant::withNameAndAccountDetails($merchantDetails['name'], $merchantDetails['account_details']);
+        $balanceRepository->getBlockedBalanceByMerchant($merchant, PrepaidCard::withDetails($cardDetails))->willReturn(100);
+        $balanceRepository->captureBalance(PrepaidCard::withDetails($cardDetails), 100, $merchant)->shouldBeCalled();;
         $this->capture($merchantDetails, $cardDetails, 100);
     }
 }

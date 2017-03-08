@@ -44,4 +44,12 @@ class Merchant
     {
         return $this->accountDetails;
     }
+
+    /**
+     * @return string
+     */
+    public function getAcountNumber() : string
+    {
+        return $this->accountDetails['sortcode'] . '-' . $this->accountDetails['account_number'];
+    }
 }
