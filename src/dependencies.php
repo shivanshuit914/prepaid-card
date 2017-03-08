@@ -17,3 +17,9 @@ $container['logger'] = function ($c) {
     $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
     return $logger;
 };
+
+$container['CardController'] = function($container)  {
+    $request = $container->get('request');
+    $response = $container->get('response');
+    return new \Application\Controller\CardController($request, $response);
+};

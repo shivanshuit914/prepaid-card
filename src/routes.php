@@ -1,10 +1,9 @@
 <?php
 // Routes
 
-$app->get('/[{name}]', function ($request, $response, $args) {
-    // Sample log message
-    $this->logger->info("Slim-Skeleton '/' route");
-
-    // Render index view
-    return $this->renderer->render($response, 'index.phtml', $args);
+$app->group('/v1', function () {
+    $this->post('/card/create', 'CardController:createNew');
+    $this->post('/card/load-money', 'CardController:loadMoney');
+    $this->post('/card/transaction', 'CardController:makeTransaction');
+    $this->get('/card/statement', 'CardController:getStatement');
 });

@@ -18,11 +18,17 @@
         "monolog/monolog": "^1.17"
     },
     "require-dev": {
-        "phpunit/phpunit": ">=4.8 < 6.0"
+        "phpunit/phpunit": ">=4.8 < 6.0",
+        "phpspec/phpspec": "^3.2"
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Application\\": "src/Application/",
+            "Domain\\": "src/Domain/"
+        },
+        "psr-0": {
+            "": "src/"
         }
     },
 	"scripts": {
